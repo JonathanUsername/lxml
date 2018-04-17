@@ -112,6 +112,9 @@ def ext_modules(static_include_dirs, static_library_dirs,
     _library_dirs = _prefer_reldirs(base_dir, library_dirs(static_library_dirs))
     _cflags = cflags(static_cflags)
     _define_macros = define_macros()
+    _ldflags = []
+    if sys.platform == 'darwin':
+        _ldflags.extend(['-isysroot', get_xcode_isysroot()])
     _libraries = libraries()
 
     if _library_dirs:
@@ -147,6 +150,7 @@ def ext_modules(static_include_dirs, static_library_dirs,
                 depends = find_dependencies(module),
                 extra_compile_args = _cflags,
                 extra_objects = static_binaries,
+                extra_link_args = _ldflags,
                 define_macros = _define_macros,
                 include_dirs = _include_dirs,
                 library_dirs = _library_dirs,
@@ -400,6 +404,8 @@ def find_xslt_config():
     return XSLT_CONFIG
 
 ## Option handling:
+def get_xcode_isysroot():
+    return run_command('xcrun', '--show-sdk-path')
 
 def has_option(name):
     try:
